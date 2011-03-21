@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe User do
   before(:each) do
-    @attr = {name:"Rob Dawson", email: "robert@rojotek.com"}
+    @attr = {name:"Rob Dawson", email: "robert@rojotek.com", password: "PassW0rd!", password_confirmation: "PassW0rd!"}
   end
   it "should create a user with when given valid attributes" do
     User.create!(@attr)
@@ -58,6 +58,42 @@ describe User do
         user = User.new(attr)
         user.should_not be_valid
       end
+    end
+  end
+  def passwords_invalid(password, password_confirmation)
+    attr = @attr.merge(password: password, password_confirmation: password_confirmation)
+    user = User.new(attr)
+    user.should_not be_valid
+  end
+  describe "password validations" do
+    it "should require a password" do   
+      passwords_invalid "", ""
+    end
+    
+    it "should require a matching password confirmation" do
+      passwords_invalid "Passw0rd", "Wrong"
+    end
+    
+    it "should reject short passwords" do
+      passwords_invalid "Abc12", "Abc12"
+    end
+
+    it "should reject long passwords" do
+      as = 'a'*47
+      long = "Lon3"+as
+      passwords_invalid long, long
+    end
+    
+    it "should require a number" do
+      passwords_invalid "Password", "Password"
+    end
+    
+    it "should require a lowercase char" do  
+      passwords_invalid "PASSWORD1", "PASSWORD1"
+    end
+    
+    it "should require a uppercase char" do
+      passwords_invalid "password1", "password1"
     end
   end
   
