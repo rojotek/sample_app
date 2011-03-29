@@ -4,6 +4,12 @@ describe User do
   before(:each) do
     @attr = {name:"Rob Dawson", email: "robert@rojotek.com", password: "PassW0rd!", password_confirmation: "PassW0rd!"}
   end
+  def invalid_user_for_attr(attrs) 
+    attr = @attr.merge(attrs)
+    user = User.new(attr)
+    user.should_not be_valid
+  end
+
   it "should create a user with when given valid attributes" do
     User.create!(@attr)
   end
@@ -15,24 +21,19 @@ describe User do
   end                                  
   it "should not allow long names" do
     long_name = 'a'*51
-    attr = @attr.merge(name: long_name)
-    user = User.new(attr)
-    user.should_not be_valid
+    invalid_user_for_attr(name: long_name)
   end
 
   it "should require an email" do
     attr = @attr.merge(email:"")
-    user = User.new(attr)
-    user.should_not be_valid
+    invalid_user_for_attr(attr)
   end
   
   describe "email" do
     it "should not allow invalid email" do
       invalid_emails = %w{no_at ends_with_at@ part_domain@bbb}
       invalid_emails.each do |invalid_email|
-        attr = @attr.merge(email: invalid_email)
-        user = User.new(attr)
-        user.should_not be_valid
+        invalid_user_for_attr(email: invalid_email)
       end
     end
     it "should allow valid email" do
@@ -45,26 +46,22 @@ describe User do
     end
     it  "should be unique" do
       User.create!(@attr)
-      attr = @attr.merge(name: "other")
-      user = User.new(attr)
-      user.should_not be_valid
+      invalid_user_for_attr(name: "other")
     end   
     it "should be unique case-insensitively" do
       User.create!(@attr)
       
       invalid_emails =%w{ROBert@rojoteK.Com ROBERT@rojotek.com robert@rojotek.COM}
       invalid_emails.each do |invalid_email|
-        attr = @attr.merge(email: invalid_email)
-        user = User.new(attr)
-        user.should_not be_valid
+        invalid_user_for_attr(email: invalid_email)
       end
     end
   end
+  
   def passwords_invalid(password, password_confirmation)
-    attr = @attr.merge(password: password, password_confirmation: password_confirmation)
-    user = User.new(attr)
-    user.should_not be_valid
-  end
+    invalid_user_for_attr(password: password, password_confirmation: password_confirmation)
+  end  
+  
   describe "password validations" do
     it "should require a password" do   
       passwords_invalid "", ""
@@ -95,6 +92,37 @@ describe User do
     it "should require a uppercase char" do
       passwords_invalid "password1", "password1"
     end
+  end 
+  
+  it "should respond to encrypted password" do
+    user = User.new(@attr)
+    user.should respond_to(:encrypted_password)
   end
   
+  it "should store an encrypted password" do
+    user = User.create!(@attr)                 
+    user.encrypted_password.should_not be_blank
+  end
+  
+  describe "has_password? method" do
+    it "should be true when correct password is given" do
+      user = User.create!(@attr)
+      user.has_password?("PassW0rd!").should be_true
+    end                               
+    it "should be false when incorrect password is given" do
+      user = User.create!(@attr)
+      user.has_password?("wrong_password").should be_false
+    end                               
+  end  
+  describe "authenticate method" do
+    it "should give user when email and password match" do
+      User.create!(@attr)
+      User.authenticate(@attr[:email], @attr[:password]).should be_true
+    end
+    it "should give nil when email and password differ " do
+      User.create!(@attr)
+      User.authenticate(@attr[:email], "wrong_pass").should be_blank
+      
+    end
+  end
 end
