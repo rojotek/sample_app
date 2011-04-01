@@ -61,13 +61,25 @@ describe UsersController do
     end
     describe 'success' do
       before(:each) do
-        @user = Factory(:user)
+        @attr={name:"Rob Dawson", 
+          email: "robert@rojotek.com", 
+          password: "Pa55word!", 
+          password_confirmation: "Pa55word!"}
       end
-      it "should be successful" do
-          post 'create', user: @user.attributes
-          response.should be_success
+      it "should redirect to the user show page" do
+          post 'create', user: @attr
+          response.should redirect_to(user_path(assigns(:user)))
       end
-      it "should create a user"
+      it "should create a user" do
+        lambda do
+          post 'create', user: @attr
+        end.should change(User, :count).by(1)
+      end
+      it "should have a welcome message" do
+        post 'create', user: @attr
+        flash[:success].should =~ /Welcome to the Sample App/i
+      end
+    
     end
   end
   describe "GET 'new'" do
