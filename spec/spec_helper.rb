@@ -40,6 +40,14 @@ Spork.each_run do
 
 end
 
+def get_should_be_success(action, params=nil)
+    get action, params
+    response.should be_success
+end
+def should_have_title(action, title, options=nil)
+   get action, options
+   response.should have_selector('title', content: title)
+end
 
 
 # --- Instructions ---

@@ -4,11 +4,6 @@ describe UsersController do
   #render_views is required to make the actions perfom html output
   render_views
   
-  def get_should_be_success(action, params=nil)
-      get action, params
-      response.should be_success
-  end
-  
   describe "GET 'show" do
     before(:each) do
       @user = Factory(:user)
@@ -24,8 +19,7 @@ describe UsersController do
     end                             
     
     it "should have the right title" do
-      get :show, id: @user
-      response.should have_selector('title', content: @user.name)
+      should_have_title :show, @user.name, id: @user
     end
     
     it "should include the users name" do
