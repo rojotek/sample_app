@@ -1,4 +1,5 @@
 class SessionsController < ApplicationController
+  before_filter :not_for_signed_in, only: [:new, :create]
 
   def new
     @title="Sign in"
@@ -22,5 +23,5 @@ class SessionsController < ApplicationController
     sign_out
     redirect_to root_path
   end
-
+  
 end

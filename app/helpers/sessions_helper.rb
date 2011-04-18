@@ -34,6 +34,10 @@ module SessionsHelper
     clear_return_to
   end
 
+  def not_for_signed_in
+    if signed_in? then redirect_to root_url end
+  end
+
   private
   
     def store_location
@@ -49,5 +53,6 @@ module SessionsHelper
     def remember_token
       cookies.signed[:remember_token] || [nil, nil]
     end  
+    
 
 end
